@@ -26,15 +26,73 @@ namespace _2048
             ColorCells();
         }
 
+        private bool IsRowMovePossible(int row)
+        {
+            List<int> vals = new List<int>();
+            for (int c = 0; c < 4; ++c)
+            {
+                 Button btnCurrent = _buttons[row * 4 + c];
+                if(!string.IsNullOrWhiteSpace(btnCurrent.Content.ToString()))
+                {
+                    vals.Add(Convert.ToInt32(btnCurrent.Content.ToString()));
+                }
+            }
+            for(int i = 0; i < vals.Count-1; ++i)
+            {
+                if (vals[i] == vals[i + 1])
+                    return true;
+            }
+            return false;
+        }
+
+        private bool IsColMovePossible(int col)
+        {
+            List<int> vals = new List<int>();
+            for (int r = 0; r < 4; ++r)
+            {
+                Button btnCurrent = _buttons[r *4 + col];
+                if (!string.IsNullOrWhiteSpace(btnCurrent.Content.ToString()))
+                {
+                    vals.Add(Convert.ToInt32(btnCurrent.Content.ToString()));
+                }
+            }
+            for (int i = 0; i < vals.Count - 1; ++i)
+            {
+                if (vals[i] == vals[i + 1])
+                    return true;
+            }
+            return false;
+        }
+
+        private bool LeftOrRightMovePossible()
+        {
+            for(int i = 0; i < 4; ++i)
+            {
+                if (IsRowMovePossible(i))
+                    return true;
+            }
+            return false;
+        }
+
+        private bool UpOrDownMovePossible()
+        {
+            for (int i = 0; i < 4; ++i)
+            {
+                if (IsColMovePossible(i))
+                    return true;
+            }
+            return false;
+        }
+
         private bool IsGameOver()
         {
-            for (int i = 0; i < 16; ++i)
+            bool bAllNotEmpty = _buttons.All(x => !string.IsNullOrWhiteSpace(x.Content.ToString()));
+            if (bAllNotEmpty)
             {
-                Button btn = _buttons[i];
-                if (string.IsNullOrWhiteSpace(btn.Content.ToString()))
-                    return false;
+                if (!LeftOrRightMovePossible() && !UpOrDownMovePossible())
+                    return true;
             }
-            return true;
+            return false;
         }
 
         private SolidColorBrush GetColorByVal(int val)
@@ -46,7 +104,7 @@ namespace _2048
             if (val == 8)
                 return Brushes.Fuchsia;
             if (val == 16)
-                return Brushes.Indigo;
+                return Brushes.PeachPuff;
             if (val == 32)
                 return Brushes.Chartreuse;
             if (val == 64)
@@ -84,11 +142,9 @@ namespace _2048
 
         private void AddNewCell()
         {
-            if(IsGameOver() == true)
-            {
-                MessageBox.Show("Game Over!!!");
-                return;
-            }
+            bool bAllNotEmpty = _buttons.All(x => !string.IsNullOrWhiteSpace(x.Content.ToString()));
+            if (bAllNotEmpty)
+                return ;
             Random r2 = new Random();
             int val2 = r2.Next(0, 10);
             if (val2 > 8)
@@ -389,6 +445,11 @@ namespace _2048
             }
             else
             {
+                if(IsGameOver() == true)
+            {
+                MessageBox.Show("Game Over!!!");
+                return;
+            }
                 bool MoveDone = false;
                 if (e.Key == System.Windows.Input.Key.Up)
                     MoveDone = ShiftUp();
@@ -399,7 +460,8 @@ namespace _2048
                 else if (e.Key == System.Windows.Input.Key.Right)
                     MoveDone = ShiftRight();
                 //if(MoveDone)
-                AddNewCell();
+                //if(!LeftOrRightMovePossible() || !UpOrDownMovePossible())
+                 AddNewCell();
                 ColorCells();
             }
         }
